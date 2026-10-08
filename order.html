@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Internet Package</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fc;
+            color: #111827;
+        }
+
+        .order-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .order-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            padding: 40px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.10);
+        }
+
+        .order-container h1 {
+            text-align: center;
+            color: #1264e8;
+            margin-bottom: 10px;
+        }
+
+        .order-container>p {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #1264e8;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #1264e8;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #0b4fc0;
+        }
+
+        #orderMessage {
+            text-align: center;
+            margin-top: 18px;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #1264e8;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .order-container {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="order-section">
+
+        <div class="order-container">
+
+            <h1>Purchase Your Package</h1>
+
+            <p>
+                Please provide your details below. Our team will contact you
+                to confirm your internet connection.
+            </p>
+
+            <form id="orderForm">
+
+                <div class="form-group">
+                    <label for="package">Selected Package</label>
+
+                    <input type="text" id="package" name="package" placeholder="Selected package" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+
+                    <input type="tel" id="phone" name="phone" placeholder="01XXXXXXXXX" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+
+                    <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Installation Address</label>
+
+                    <textarea id="address" name="address" placeholder="Enter your full address" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Additional Message</label>
+
+                    <textarea id="message" name="message" placeholder="Anything you want us to know?"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Submit Purchase Request
+                </button>
+
+            </form>
+
+            <p id="orderMessage"></p>
+
+            <a href="index.html" class="back-link">
+                ← Back to Home
+            </a>
+
+        </div>
+
+    </section>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const selectedPackage = params.get("package");
+
+        if (selectedPackage) {
+            document.getElementById("package").value =
+                selectedPackage.replace(/-/g, " ");
+        }
+
+        const orderForm = document.getElementById("orderForm");
+        const orderMessage = document.getElementById("orderMessage");
+
+        orderForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(orderForm);
+
+            const orderData = {
+                package: formData.get("package"),
+                name: formData.get("name"),
+                phone: formData.get("phone"),
+                email: formData.get("email"),
+                address: formData.get("address"),
+                message: formData.get("message")
+            };
+
+            try {
+                const response = await fetch("/api/order", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+
+                orderMessage.textContent = result.message;
+
+                if (result.success) {
+                    orderForm.reset();
+                }
+
+            } catch (error) {
+                console.error(error);
+
+                orderMessage.textContent =
+                    "Something went wrong. Please try again.";
+            }
+        });
+    </script>
+
+</body>
+
+</html>
